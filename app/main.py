@@ -91,14 +91,75 @@ async def generate_report(form: HearingForm):
 
     report_text = message.content[0].text
 
-    # メールアドレスが入力されていれば送信する
+    # クライアントにメールアドレスが入力されていれば、レポートを送信する
     if form.email:
         send_report_email(form.company_name, form.contact_name, form.email, report_text)
+
+    # 大石さん（オーナー）に新規ヒアリングの通知メールを送る
+    send_owner_notification(form, report_text)
 
     return {
         "status": "success",
         "report": report_text
     }
+
+
+def send_owner_notification(form: HearingForm, report_text: str):
+    """新規ヒアリングが届いたことをオーナー（大石さん）に通知する"""
+    gmail_address = os.getenv("GMAIL_ADDRESS")
+    gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
+    sender_name = os.getenv("SENDER_NAME", "Concha IT Nexus")
+    # 通知先はGMAIL_ADDRESSと同じ（自分自身に送る）
+    # 別のアドレスに送りたい場合は NOTIFY_EMAIL を環境変数に追加する
+    notify_email = os.getenv("NOTIFY_EMAIL", gmail_address)
+
+    # メール未設定の場合はスキップ
+    if not gmail_address or not gmail_app_password:
+        return
+
+    # 件名：誰から届いたか一目でわかる形式
+    subject = f"【新規ヒアリング】{form.company_name}｜{form.contact_name}様"
+
+    # 本文：入力内容をすべて含める
+    body = f"""新規ヒアリングが届きました。
+
+━━━━━━━━━━━━━━━━━━━━━━
+【入力内容】
+
+会社名・屋号　: {form.company_name}
+担当者名　　　: {form.contact_name}
+従業員規模　　: {form.employee_count}
+業種　　　　　: {form.industry}
+使用ツール　　: {form.current_tools if form.current_tools else "（未入力）"}
+連絡先メール　: {form.email if form.email else "（未入力）"}
+
+【困っていること・解決したいこと】
+{form.problems}
+
+━━━━━━━━━━━━━━━━━━━━━━
+【生成されたレポート】
+
+{report_text}
+
+━━━━━━━━━━━━━━━━━━━━━━
+{sender_name}
+"""
+
+    # MIMEメッセージを作成
+    msg = MIMEMultipart()
+    msg["From"] = f"{sender_name} <{gmail_address}>"
+    msg["To"] = notify_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    # GmailのSMTPサーバーで送信
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+            server.login(gmail_address, gmail_app_password)
+            server.send_message(msg)
+    except Exception as e:
+        # 通知失敗してもレポート表示は続ける（ログだけ残す）
+        print(f"オーナー通知メール送信エラー: {e}")
 
 
 def send_report_email(company_name: str, contact_name: str, to_email: str, report_text: str):
