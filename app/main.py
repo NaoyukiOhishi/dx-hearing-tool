@@ -25,7 +25,8 @@ app.add_middleware(
 
 # フォームから受け取るデータの型を定義
 class HearingForm(BaseModel):
-    company_name: str       # 会社名
+    company_name: str       # 会社名・屋号
+    contact_name: str       # 担当者名
     employee_count: str     # 従業員規模
     industry: str           # 業種
     current_tools: str      # 現在使っているシステム・ツール
@@ -54,7 +55,8 @@ async def generate_report(form: HearingForm):
 以下の中小企業の情報をもとに、IT・業務課題の整理レポートを作成してください。
 
 【企業情報】
-- 会社名: {form.company_name}
+- 会社名・屋号: {form.company_name}
+- 担当者名: {form.contact_name}
 - 従業員規模: {form.employee_count}
 - 業種: {form.industry}
 - 現在使用しているシステム・ツール: {form.current_tools}
@@ -91,7 +93,7 @@ async def generate_report(form: HearingForm):
 
     # メールアドレスが入力されていれば送信する
     if form.email:
-        send_report_email(form.company_name, form.email, report_text)
+        send_report_email(form.company_name, form.contact_name, form.email, report_text)
 
     return {
         "status": "success",
@@ -99,7 +101,7 @@ async def generate_report(form: HearingForm):
     }
 
 
-def send_report_email(company_name: str, to_email: str, report_text: str):
+def send_report_email(company_name: str, contact_name: str, to_email: str, report_text: str):
     """レポートをメールで送信する"""
     gmail_address = os.getenv("GMAIL_ADDRESS")
     gmail_app_password = os.getenv("GMAIL_APP_PASSWORD")
@@ -107,7 +109,7 @@ def send_report_email(company_name: str, to_email: str, report_text: str):
 
     # メールの件名と本文を作成
     subject = f"【IT課題整理レポート】{company_name} 様"
-    body = f"""{company_name} 様
+    body = f"""{contact_name} 様（{company_name}）
 
 この度はIT課題ヒアリングフォームにご入力いただき、ありがとうございます。
 以下に、現状の課題整理レポートをお送りします。
