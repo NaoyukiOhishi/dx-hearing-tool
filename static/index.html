@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IT課題ヒアリングフォーム | Concha IT Nexus</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: #f5f7fa;
+      color: #333;
+      padding: 40px 16px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: bold;
+      color: #1a1a2e;
+      margin-bottom: 12px;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: #666;
+      line-height: 1.7;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 36px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      color: #444;
+      margin-bottom: 8px;
+    }
+
+    label .required {
+      color: #e53e3e;
+      margin-left: 4px;
+    }
+
+    label .optional {
+      color: #999;
+      font-weight: normal;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #4a6fa5;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: #4a6fa5;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .submit-btn:hover { background: #3a5a8f; }
+    .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* ローディング表示 */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #4a6fa5;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* レポート表示 */
+    .report-area {
+      display: none;
+    }
+
+    .report-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1a1a2e;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #4a6fa5;
+    }
+
+    .report-content {
+      font-size: 15px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      color: #333;
+    }
+
+    .download-btn {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 12px 24px;
+      background: #2d7d46;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .download-btn:hover { background: #245f36; }
+
+    .error-msg {
+      display: none;
+      background: #fff5f5;
+      border: 1px solid #fed7d7;
+      color: #c53030;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>IT課題ヒアリングフォーム</h1>
+      <p>現在の業務・ITの状況をご入力いただくと、<br>
+      AIがお客様の課題を整理したレポートを自動生成します。</p>
+    </div>
+
+    <!-- 入力フォーム -->
+    <div class="card" id="form-area">
+      <form id="hearing-form">
+
+        <div class="form-group">
+          <label>会社名 <span class="required">*</span></label>
+          <input type="text" name="company_name" placeholder="例：株式会社〇〇" required>
+        </div>
+
+        <div class="form-group">
+          <label>従業員規模 <span class="required">*</span></label>
+          <select name="employee_count" required>
+            <option value="">選択してください</option>
+            <option value="1〜9名">1〜9名</option>
+            <option value="10〜29名">10〜29名</option>
+            <option value="30〜49名">30〜49名</option>
+            <option value="50〜99名">50〜99名</option>
+            <option value="100名以上">100名以上</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>業種 <span class="required">*</span></label>
+          <input type="text" name="industry" placeholder="例：製造業、小売業、サービス業など" required>
+        </div>
+
+        <div class="form-group">
+          <label>現在使っているシステム・ツール <span class="optional">（任意）</span></label>
+          <textarea name="current_tools" placeholder="例：Excel、freee、Slack、Googleワークスペースなど"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>困っていること・解決したいこと <span class="required">*</span></label>
+          <textarea name="problems" placeholder="例：紙の書類が多くて管理が大変、担当者しか使えない業務がある、など。詳しく書いていただくほど精度が上がります。" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>メールアドレス <span class="optional">（任意・レポートを送付します）</span></label>
+          <input type="email" name="email" placeholder="example@company.com">
+        </div>
+
+        <div class="error-msg" id="error-msg">
+          エラーが発生しました。時間をおいて再度お試しください。
+        </div>
+
+        <button type="submit" class="submit-btn" id="submit-btn">
+          課題整理レポートを生成する
+        </button>
+
+      </form>
+    </div>
+
+    <!-- ローディング表示 -->
+    <div class="card loading" id="loading-area">
+      <div class="spinner"></div>
+      <p style="color:#666; font-size:15px;">AIが課題を分析中です...<br>30秒ほどお待ちください。</p>
+    </div>
+
+    <!-- レポート表示 -->
+    <div class="card report-area" id="report-area">
+      <div class="report-title">📋 IT課題整理レポート</div>
+      <div class="report-content" id="report-content"></div>
+      <button class="download-btn" id="download-btn">
+        レポートをテキストでダウンロード
+      </button>
+    </div>
+
+    <div class="footer">
+      Concha IT Nexus &nbsp;|&nbsp; DX顧問・業務IT支援
+    </div>
+
+  </div>
+
+  <script>
+    // APIのURL（Render.comのURLに変更する）
+    const API_URL = "https://ここにRender.comのURLを入れる";
+
+    const form = document.getElementById("hearing-form");
+    const submitBtn = document.getElementById("submit-btn");
+    const formArea = document.getElementById("form-area");
+    const loadingArea = document.getElementById("loading-area");
+    const reportArea = document.getElementById("report-area");
+    const reportContent = document.getElementById("report-content");
+    const errorMsg = document.getElementById("error-msg");
+    const downloadBtn = document.getElementById("download-btn");
+
+    let generatedReport = "";
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // フォームデータを取得
+      const data = {
+        company_name: form.company_name.value,
+        employee_count: form.employee_count.value,
+        industry: form.industry.value,
+        current_tools: form.current_tools.value,
+        problems: form.problems.value,
+        email: form.email.value,
+      };
+
+      // ローディング表示に切り替え
+      formArea.style.display = "none";
+      loadingArea.style.display = "block";
+      errorMsg.style.display = "none";
+
+      try {
+        // APIにPOSTリクエストを送る
+        const response = await fetch(`${API_URL}/api/hearing`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) throw new Error("APIエラー");
+
+        const result = await response.json();
+        generatedReport = result.report;
+
+        // レポートを表示
+        reportContent.textContent = generatedReport;
+        loadingArea.style.display = "none";
+        reportArea.style.display = "block";
+
+      } catch (err) {
+        // エラー時はフォームに戻してエラーメッセージを表示
+        loadingArea.style.display = "none";
+        formArea.style.display = "block";
+        errorMsg.style.display = "block";
+        console.error(err);
+      }
+    });
+
+    // ダウンロードボタン
+    downloadBtn.addEventListener("click", () => {
+      const blob = new Blob([generatedReport], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "IT課題整理レポート.txt";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+
+</body>
+</html>
