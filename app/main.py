@@ -1,5 +1,6 @@
 import os
 import smtplib
+from datetime import date
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -61,6 +62,7 @@ async def generate_report(form: HearingForm):
 - 業種: {form.industry}
 - 現在使用しているシステム・ツール: {form.current_tools}
 - 困っていること・解決したいこと: {form.problems}
+- 本日の日付: {date.today().strftime("%Y年%m月%d日")}
 
 以下の構成でレポートを作成してください。
 
