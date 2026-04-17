@@ -142,8 +142,84 @@
     .report-content {
       font-size: 15px;
       line-height: 1.8;
-      white-space: pre-wrap;
       color: #333;
+    }
+
+    /* Markdown→HTML変換後のスタイル */
+    .report-content h1 {
+      font-size: 22px;
+      color: #1a1a2e;
+      margin: 28px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #4a6fa5;
+    }
+
+    .report-content h2 {
+      font-size: 18px;
+      color: #1a1a2e;
+      margin: 24px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .report-content h3 {
+      font-size: 16px;
+      color: #2d3748;
+      margin: 20px 0 8px;
+    }
+
+    .report-content p {
+      margin: 8px 0;
+    }
+
+    .report-content strong {
+      color: #1a1a2e;
+    }
+
+    .report-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    .report-content th {
+      background: #4a6fa5;
+      color: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .report-content td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .report-content tr:nth-child(even) {
+      background: #f7fafc;
+    }
+
+    .report-content ul, .report-content ol {
+      margin: 8px 0 8px 24px;
+    }
+
+    .report-content li {
+      margin: 4px 0;
+    }
+
+    .report-content hr {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 24px 0;
+    }
+
+    .report-content blockquote {
+      border-left: 4px solid #4a6fa5;
+      padding: 8px 16px;
+      margin: 12px 0;
+      background: #f7fafc;
+      color: #555;
     }
 
     .download-btn {
@@ -179,6 +255,7 @@
       margin-top: 32px;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -315,7 +392,7 @@
         generatedReport = result.report;
 
         // レポートを表示
-        reportContent.textContent = generatedReport;
+        reportContent.innerHTML = marked.parse(generatedReport);
         loadingArea.style.display = "none";
         reportArea.style.display = "block";
 
